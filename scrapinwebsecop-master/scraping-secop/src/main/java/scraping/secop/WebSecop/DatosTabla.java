@@ -6,7 +6,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import scraping.secop.SecopVO.Constantes;
 import scraping.secop.SecopVO.DatosTablaVO;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +25,6 @@ public class DatosTabla {
                 Set<String> tab_handles = driver.getWindowHandles();
                 int number_of_tabs = tab_handles.size();
                 int new_tab_index = number_of_tabs-1;
-                LOG.info(new_tab_index);
                 driver.switchTo().window(tab_handles.toArray()[new_tab_index].toString());
                 fillData(driver, nombreEntidad, contador);
                 contador++;
@@ -116,14 +114,18 @@ public class DatosTabla {
     }
 
     private void clickMore(String nombreDocumento, WebDriver driver, int x){
-        if(nombreDocumento.contains("ESTUDIOS PREVIOS") || nombreDocumento.contains("PLIEGO DIFINITIVO")) {
+        if(nombreDocumento.contains("ESTUDIOS PREVIOS") || nombreDocumento.contains("ANEXO OPERADOR COTIZACION")) {
             WebElement element = new WebDriverWait(driver, 20).until(ExpectedConditions.visibilityOfElementLocated(By.id("lnkDetailLinkP3Gen_"+x)));
             JavascriptExecutor js = (JavascriptExecutor)driver;
             js.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);
-            driver.switchTo().activeElement();
-            WebElement descarga = new WebDriverWait(driver, Constantes.Timeout).until(ExpectedConditions.visibilityOfElementLocated(By.id("frmMainForm_tblMainTable_trMTR4_tdMTC4_tbToolBarPlaceHolder_btnDownloadDocument")));
-            JavascriptExecutor jsExcu = (JavascriptExecutor)driver;
-            jsExcu.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, descarga);
+            Set<String> tab_handles = driver.getWindowHandles();
+            int number_of_tabs = tab_handles.size();
+            int new_tab_index = number_of_tabs-1;
+            driver.switchTo().window(tab_handles.toArray()[new_tab_index].toString());
+            WebDriverWait wait = new WebDriverWait(driver, Constantes.TimeoutShort);
+            WebElement element1 = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tdMTC1_tbToolBar_btnDownloadDocument")));
+            element1.click();
+            driver.switchTo().window(tab_handles.toArray()[1].toString());
         }
     }
 

@@ -5,10 +5,13 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import scraping.secop.SecopVO.Constantes;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -16,17 +19,23 @@ public class ScrapingWebSecop {
 
     private final static Logger LOG = Logger.getLogger(ScrapingWebSecop.class);
     private WebDriverWait wait;
-    private WebDriver driver;
+    private File folder;
 
     public void startScrapinWeb(String codigo){
         try{
             LOG.info("Iniciando driver de chrome");
-            String folder = System.getProperty("user.dir"+"\\downloads\\descargaselenium");
-            HashMap<String, Object> chromepref = new HashMap<>();
-            chromepref.put("download.default_directory", folder);
-            chromepref.put("download.prompt_for_download", false);
+            folder = new File(UUID.randomUUID().toString());
+            folder.mkdirs();
+            LOG.info(folder.getAbsolutePath());
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", folder.getAbsolutePath());
             ChromeOptions options = new ChromeOptions();
-            options.setExperimentalOption("prefs", chromepref);
+            options.setExperimentalOption("prefs", chromePrefs);
+            options.addArguments("--disable-notifications");
+            DesiredCapabilities cap = DesiredCapabilities.chrome();
+            cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+            cap.setCapability(ChromeOptions.CAPABILITY, options);
             System.setProperty("webdriver.chrome.driver", "D:\\SeleniumDrive\\chromedriver.exe");
             WebDriver driver = new ChromeDriver(options);
             driver.manage().window().maximize();
