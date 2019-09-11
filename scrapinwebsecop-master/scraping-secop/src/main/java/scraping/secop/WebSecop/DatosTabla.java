@@ -13,10 +13,10 @@ import java.util.Set;
 public class DatosTabla {
 
     private final static Logger LOG = Logger.getLogger(DatosTabla.class);
-    private List<DatosTablaVO> listDatos = new ArrayList<DatosTablaVO>();
+    private List<DatosTablaVO> listDatos = new ArrayList<>();
+    private List<String> nombreArchivos = new ArrayList<>();
 
-
-    public void goToLink(WebDriver driver, List<String> links, List<String> nombreEntidad){
+    public void goToLink(WebDriver driver, List<String> links, List<String> nombreEntidad, String path){
         try {
             int contador = 0;
             for (String x: links) {
@@ -26,13 +26,13 @@ public class DatosTabla {
                 int number_of_tabs = tab_handles.size();
                 int new_tab_index = number_of_tabs-1;
                 driver.switchTo().window(tab_handles.toArray()[new_tab_index].toString());
-                fillData(driver, nombreEntidad, contador);
-                contador++;
                 descargarDocumentos(driver);
+                fillData(driver, nombreEntidad, contador, path);
+                contador++;
                 driver.close();
                 driver.switchTo().window(tab_handles.toArray()[0].toString());
             }
-            new SendEmail().email(listDatos);
+            new SendEmail().email(listDatos, nombreArchivos);
             driver.close();
         }
         catch (WebDriverException ex){
@@ -41,11 +41,12 @@ public class DatosTabla {
         }
     }
 
-    private void fillData(WebDriver driver, List<String> nombresEntidad, int contador){
+    private void fillData(WebDriver driver, List<String> nombresEntidad, int contador, String path){
         try{
             DatosTablaVO datos = new DatosTablaVO();
             datos.setNombreEntidad(nombresEntidad.get(contador));
             datos.setEnlace(driver.getCurrentUrl());
+            datos.setDescripcion(driver.findElement(By.id("divDescriptionDiv_spnDescription")).getText());
             if(elementeExist("cbxPriceGen", driver)){
                 String valor = driver.findElement(By.id("cbxPriceGen")).getText();
                 datos.setValorEstimado(valor);
@@ -65,8 +66,7 @@ public class DatosTabla {
                 codigos.add("");
                 datos.setListaCodigosUBSPC(codigos);
             }
-
-            datos.setDescripcion(driver.findElement(By.id("divDescriptionDiv_spnDescription")).getText());
+            datos.setPath(path);
             listDatos.add(datos);
         }
         catch (WebDriverException ex){
@@ -75,7 +75,7 @@ public class DatosTabla {
         }
     }
 
-    private void descargarDocumentos(WebDriver driver){
+    private  void descargarDocumentos(WebDriver driver){
         try{
             JavascriptExecutor js = (JavascriptExecutor)driver;
             js.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, driver.findElement(By.xpath("//*[@id='mprContractNoticeMapper']/a[4]")));
@@ -93,6 +93,8 @@ public class DatosTabla {
                         String nombreDocumento = fila.getText();
                         this.clickMore(nombreDocumento, driver, x);
                     }else if(x > 10){
+                        WebDriverWait espera = new WebDriverWait(driver, Constantes.TimeoutShort);
+                        WebElement archivo = espera.until(ExpectedConditions.visibilityOfElementLocated(By.id("tdColumnDocumentNameP2Gen_spnDocumentName_"+x)));
                         JavascriptExecutor jaExecu = (JavascriptExecutor) driver;
                         jaExecu.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, driver.findElement(By.id("grdGridDocumentList_Paginator_goToPage_Next")));
                         WebDriverWait wait1 = new WebDriverWait(driver, Constantes.Timeout);
@@ -107,6 +109,7 @@ public class DatosTabla {
                     }
                 }
             }
+            nombreArchivos.add(null);
         }
         catch (WebDriverException ex){
             LOG.info("Ocurrio un error descargando los documentos: " + ex.getMessage());
@@ -114,7 +117,7 @@ public class DatosTabla {
     }
 
     private void clickMore(String nombreDocumento, WebDriver driver, int x){
-        if(nombreDocumento.contains("ESTUDIOS PREVIOS") || nombreDocumento.contains("ANEXO OPERADOR COTIZACION")) {
+        if(nombreDocumento.contains("C-1175-2019") || nombreDocumento.contains("C-1176-2019")) {
             WebElement element = new WebDriverWait(driver, 20).until(ExpectedConditions.visibilityOfElementLocated(By.id("lnkDetailLinkP3Gen_"+x)));
             JavascriptExecutor js = (JavascriptExecutor)driver;
             js.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);
@@ -123,9 +126,16 @@ public class DatosTabla {
             int new_tab_index = number_of_tabs-1;
             driver.switchTo().window(tab_handles.toArray()[new_tab_index].toString());
             WebDriverWait wait = new WebDriverWait(driver, Constantes.TimeoutShort);
-            WebElement element1 = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tdMTC1_tbToolBar_btnDownloadDocument")));
-            element1.click();
-            driver.switchTo().window(tab_handles.toArray()[1].toString());
+            if(elementeExist("tdMTC1_tbToolBar_btnDownloadDocument", driver)){
+                nombreArchivos.add(nombreDocumento);
+                WebElement element1 = driver.findElement(By.id("tdMTC1_tbToolBar_btnDownloadDocument"));
+                JavascriptExecutor jsExcu = (JavascriptExecutor)driver;
+                jsExcu.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element1);
+                driver.switchTo().window(tab_handles.toArray()[1].toString());
+            }else{
+                nombreArchivos.add(null);
+            }
+
         }
     }
 

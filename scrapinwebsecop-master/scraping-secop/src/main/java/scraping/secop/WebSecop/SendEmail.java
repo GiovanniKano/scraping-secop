@@ -4,9 +4,15 @@ import org.apache.log4j.Logger;
 import scraping.secop.SecopVO.Constantes;
 import scraping.secop.SecopVO.DatosTablaVO;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,7 +20,7 @@ public class SendEmail {
 
     private static final Logger LOG = Logger.getLogger(SendEmail.class);
 
-    public void email(List<DatosTablaVO> datosLista){
+    public void email(List<DatosTablaVO> datosLista, List<String> nombresArchivos){
         String host="smtp.gmail.com";
         final String user="giovannykano@gmail.com";
         final String password = Constantes.PASSWORDMAIL;
@@ -42,7 +48,9 @@ public class SendEmail {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(user));
             message.addRecipient(Message.RecipientType.TO,new InternetAddress(to));
+            Multipart multipart = new MimeMultipart();
             message.setSubject("Proceso de scraping");
+            BodyPart mensajeBody = new MimeBodyPart();
             mensaje.append("Mensaje para oddoo  \n");
             for (DatosTablaVO datos : datosLista) {
                 mensaje.append("Nombre de la entidad:" + datos.getNombreEntidad()+ "\n");
@@ -54,11 +62,26 @@ public class SendEmail {
                 }
             }
             mensaje.append("\n");
-            message.setText(mensaje.toString());
+            mensajeBody.setText(mensaje.toString());
+            multipart.addBodyPart(mensajeBody);
+            mensajeBody = new MimeBodyPart();
+            int contador = 0;
+            for (DatosTablaVO datos : datosLista) {
+                LOG.info("Ruta: " + datos.getPath() + "\\" + nombresArchivos.get(contador));
+                if(nombresArchivos.get(contador) != null){
+                    DataSource source = new FileDataSource(datos.getPath() + "\\" + nombresArchivos.get(contador));
+                    mensajeBody.setDataHandler(new DataHandler(source));
+                    mensajeBody.setFileName(source.getName());
+                }
+                contador++;
+            }
+            multipart.addBodyPart(mensajeBody);
+            message.setContent(multipart);
             Transport.send(message);
-            LOG.info("Mensaja enviado...");
+            LOG.info("Mensaje enviado...");
         } catch (MessagingException ex){
             LOG.error("Ocurrio un error enviando el mensaje: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

@@ -15,6 +15,6 @@ public class Constantes {
 
     public static final String SUPERPOSICION_NO_PERMANENTE = "arguments[0].click();";
 
-    public static final String PASSWORDMAIL = "XXXXXXXX";
+    public static final String PASSWORDMAIL = "Dayannayyo2016";
 
 }

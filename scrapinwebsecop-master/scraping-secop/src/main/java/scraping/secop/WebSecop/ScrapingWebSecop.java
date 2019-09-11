@@ -36,7 +36,7 @@ public class ScrapingWebSecop {
             DesiredCapabilities cap = DesiredCapabilities.chrome();
             cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
             cap.setCapability(ChromeOptions.CAPABILITY, options);
-            System.setProperty("webdriver.chrome.driver", "D:\\SeleniumDrive\\chromedriver.exe");
+            System.setProperty("webdriver.chrome.driver", "C:\\Users\\Giova\\Documents\\DriverChrome\\chromedriver.exe");
             WebDriver driver = new ChromeDriver(options);
             driver.manage().window().maximize();
             driver.get(Constantes.URL);
@@ -191,7 +191,7 @@ public class ScrapingWebSecop {
                 links.add(text);
                 LOG.info(links.get(x));
             }
-            new DatosTabla().goToLink(driver, links, entidad);
+            new DatosTabla().goToLink(driver, links, entidad, folder.getAbsolutePath());
         }
         catch (WebDriverException ex){
             LOG.error("Ocurrio un error obteniendo detalle de la tabla: " + ex.getMessage());
