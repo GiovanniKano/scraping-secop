@@ -8,17 +8,8 @@ public class DatosTablaVO {
     private String descripcion;
     private String valorEstimado;
     private List<String> listaCodigosUBSPC;
-    private String presentacionOferta;
+    private String fechaPresentacion;
     private String nombreEntidad;
-    private String path;
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
 
     public String getEnlace() {
         return enlace;
@@ -52,12 +43,12 @@ public class DatosTablaVO {
         this.listaCodigosUBSPC = listaCodigosUBSPC;
     }
 
-    public String getPresentacionOferta() {
-        return presentacionOferta;
+    public String getFechaPresentacion() {
+        return fechaPresentacion;
     }
 
-    public void setPresentacionOferta(String presentacionOferta) {
-        this.presentacionOferta = presentacionOferta;
+    public void setFechaPresentacion(String fechaPresentacion) {
+        this.fechaPresentacion = fechaPresentacion;
     }
 
     public String getNombreEntidad() {

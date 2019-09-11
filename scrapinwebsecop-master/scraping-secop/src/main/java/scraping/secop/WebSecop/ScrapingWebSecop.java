@@ -4,12 +4,12 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import scraping.secop.SecopVO.Constantes;
+import scraping.secop.Util.ElementExist;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -20,6 +20,7 @@ public class ScrapingWebSecop {
     private final static Logger LOG = Logger.getLogger(ScrapingWebSecop.class);
     private WebDriverWait wait;
     private File folder;
+    private ElementExist exist;
 
     public void startScrapinWeb(String codigo){
         try{
@@ -36,7 +37,7 @@ public class ScrapingWebSecop {
             DesiredCapabilities cap = DesiredCapabilities.chrome();
             cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
             cap.setCapability(ChromeOptions.CAPABILITY, options);
-            System.setProperty("webdriver.chrome.driver", "C:\\Users\\Giova\\Documents\\DriverChrome\\chromedriver.exe");
+            System.setProperty("webdriver.chrome.driver", "D:\\SeleniumDrive\\chromedriver.exe");
             WebDriver driver = new ChromeDriver(options);
             driver.manage().window().maximize();
             driver.get(Constantes.URL);
@@ -103,7 +104,7 @@ public class ScrapingWebSecop {
             LOG.info("Esperando respuesta");
             wait = new WebDriverWait(driver, Constantes.Timeout);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("loadingCursor")));
-            if(wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("loadingCursor")))){
+            if(wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("loadingCursor")))) {
                 getTable(driver);
             }
         }
@@ -137,7 +138,7 @@ public class ScrapingWebSecop {
         try{
             String[] campos;
             boolean filaCompleta = true;
-            List<WebElement> filas = new ArrayList<WebElement>();
+            List<WebElement> filas = new ArrayList<>();
             for(int x = 0; x < tabla.size(); x++){
                 WebDriverWait wait = new WebDriverWait(driver, Constantes.Timeout);
                 WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("dtmbRequestOnlinePublishingDate_"+x)));
@@ -153,12 +154,12 @@ public class ScrapingWebSecop {
             }
             LOG.info(filaCompleta);
             if(filaCompleta){
-                WebElement element = driver.findElement(By.id("tblMainTable_trRowMiddle_tdCell1_tblForm_trGridRow_tdCell1_grdResultList_Paginator_goToPage_MoreItems"));
-                JavascriptExecutor java = (JavascriptExecutor)driver;
-                java.executeScript("arguments[0].scrollIntoView();", element);
-                java.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);
+                clickMoreTable(driver);
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("loadingCursor")));
                 if(wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("loadingCursor")))){
+                    this.getTable(driver);
+                }
+                if(!exist.elementeExist("esperaProvocada", driver)){
                     this.getTable(driver);
                 }
             }
@@ -217,5 +218,12 @@ public class ScrapingWebSecop {
             LOG.error("Ocurrio un error comparando fechas" + ex.getMessage());
             return false;
         }
+    }
+
+    private void clickMoreTable(WebDriver driver){
+        WebElement element = driver.findElement(By.id("tblMainTable_trRowMiddle_tdCell1_tblForm_trGridRow_tdCell1_grdResultList_Paginator_goToPage_MoreItems"));
+        JavascriptExecutor java = (JavascriptExecutor)driver;
+        java.executeScript("arguments[0].scrollIntoView();", element);
+        java.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);
     }
 }

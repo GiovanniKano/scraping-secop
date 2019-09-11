@@ -1,7 +1,7 @@
 package scraping.secop;
 
 import org.apache.log4j.Logger;
-import scraping.secop.WebSecop.FilesUtils;
+import scraping.secop.Util.FilesUtils;
 import scraping.secop.WebSecop.ScrapingWebSecop;
 
 import java.util.List;
