@@ -10,7 +10,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import scraping.secop.SecopVO.Constantes;
 import scraping.secop.Util.ElementExist;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -200,7 +199,7 @@ public class ScrapingWebSecop {
         }
     }
 
-    private Boolean diasTranscurridos(String fecha){
+    private boolean diasTranscurridos(String fecha){
         try{
             String hoy = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a").format(new Date());
             Date fechafin = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a").parse(hoy);
@@ -209,7 +208,7 @@ public class ScrapingWebSecop {
             int diferencia = (int)(fechafin.getTime() - fechainicio.getTime());
             int horas = diferencia/(1000*60*60);
             LOG.info("Hora de diferencia: " + horas);
-            if(horas <= 48 && horas >= 0){
+            if(horas <= Constantes.HORAS && horas >= 0){
                 return true;
             }
             return false;

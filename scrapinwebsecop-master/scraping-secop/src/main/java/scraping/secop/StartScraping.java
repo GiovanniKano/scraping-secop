@@ -1,10 +1,11 @@
 package scraping.secop;
 
 import org.apache.log4j.Logger;
-import scraping.secop.Util.FilesUtils;
-import scraping.secop.WebSecop.ScrapingWebSecop;
-
-import java.util.List;
+import scraping.secop.TaskSchedular.Task;
+import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class StartScraping {
 
@@ -12,12 +13,9 @@ public class StartScraping {
 
     public static void main(String[] args) {
         try{
-            ScrapingWebSecop web = new ScrapingWebSecop();
-            List<String> codigos = new FilesUtils().leerArchivo();
-            for(int i = 0; i < codigos.size(); i++){
-                LOG.info(codigos.get(i));
-                web.startScrapinWeb(codigos.get(i));
-            }
+            LOG.info("Iniciando scraping:" + new Date());
+            ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+            service.scheduleAtFixedRate(new Task(), 0, 30, TimeUnit.MINUTES);
         }
         catch (Exception ex){
             LOG.error("Ha ocurrido un error iniciando scraping" + ex.getMessage());

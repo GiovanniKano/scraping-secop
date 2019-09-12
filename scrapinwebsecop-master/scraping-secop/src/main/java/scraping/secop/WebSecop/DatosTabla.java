@@ -8,7 +8,6 @@ import scraping.secop.SecopVO.Constantes;
 import scraping.secop.SecopVO.DatosTablaVO;
 import scraping.secop.Util.ElementExist;
 import scraping.secop.Util.FilesUtils;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +33,7 @@ public class DatosTabla {
                 File ruta = new FilesUtils().moveDocuments(path);
                 fillData(driver, nombreEntidad, contador);
                 new SendEmail().email(listDatos.get(contador), ruta.getAbsolutePath());
+                ruta.delete();
                 contador++;
                 driver.close();
                 driver.switchTo().window(tab_handles.toArray()[0].toString());
