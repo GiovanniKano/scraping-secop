@@ -58,11 +58,11 @@ public class ScrapingWebSecop {
             driver.findElement(By.id("txtPassword")).sendKeys(Constantes.cotrasena);
             driver.findElement(By.id("btnLoginButton")).click();
             LOG.info("Inicio de sesión exitoso.");
-            wait = new WebDriverWait(driver, Constantes.Timeout);
+            /*wait = new WebDriverWait(driver, Constantes.Timeout);
             WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("btnAcknowledgeGen")));
             LOG.info(element);
             JavascriptExecutor jse2 = (JavascriptExecutor)driver;
-            jse2.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);
+            jse2.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);*/
         }
         catch (WebDriverException ex){
             LOG.error("Ocurrio un error iniciado sesión en la página" + ex.getMessage());

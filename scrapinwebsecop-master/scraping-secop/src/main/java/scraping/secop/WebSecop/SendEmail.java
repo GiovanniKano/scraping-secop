@@ -44,6 +44,9 @@ public class SendEmail {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(Constantes.USEREMAIL));
             message.addRecipient(Message.RecipientType.TO,new InternetAddress(Constantes.TOUSERMAIL));
+            long size = new FilesUtils().getSizeOfDirectory(path);
+            size = size / (1024*1024);
+            LOG.info(size + "mb");
             Multipart multipart = new MimeMultipart();
             message.setSubject(datos.getDescripcion());
             BodyPart mensajeBody = new MimeBodyPart();
@@ -57,9 +60,13 @@ public class SendEmail {
             mensaje.append("Valor estimado: " + datos.getValorEstimado()+ "\n");
             mensaje.append("\n");
             for(int x = 0; x < datos.getListaCodigosUBSPC().size(); x++){
-                mensaje.append("Codigos UNSPC: " + datos.getListaCodigosUBSPC().get(0)+ "\n");
+                LOG.info(datos.getListaCodigosUBSPC().get(x));
+                mensaje.append("Codigos UNSPC: " + datos.getListaCodigosUBSPC().get(x)+ "\n");
             }
             mensaje.append("Fecha publicación: " + datos.getFechaPresentacion() + "\n");
+            if(size > 25){
+                mensaje.append("El contenido tiene archivos pero su peso es mayor a lo permito por gmail. Su peso es: " + size +"mb" + "\n");
+            }
             mensaje.append("\n");
             mensaje.append("\n");
 
@@ -67,18 +74,19 @@ public class SendEmail {
             mensajeBody.setText(mensaje.toString());
             multipart.addBodyPart(mensajeBody);
 
-            List<File> files = new FilesUtils().getDocumentsFolder(path);
-            for (File archivos : files) {
-                DataSource source = new FileDataSource(archivos.getAbsolutePath());
-                BodyPart body = new MimeBodyPart();
-                body.setDataHandler(new DataHandler(source));
-                body.setFileName(source.getName());
-                multipart.addBodyPart(body);
+            if(size < 25){
+                List<File> files = new FilesUtils().getDocumentsFolder(path);
+                for (File archivos : files) {
+                    DataSource source = new FileDataSource(archivos.getAbsolutePath());
+                    BodyPart body = new MimeBodyPart();
+                    body.setDataHandler(new DataHandler(source));
+                    body.setFileName(source.getName());
+                    multipart.addBodyPart(body);
+                }
             }
 
             message.setContent(multipart);
             Transport.send(message);
-
             LOG.info("Mensaje enviado...");
         } catch (MessagingException ex){
             LOG.error("Ocurrió un error enviando el mensaje: " + ex.getMessage());

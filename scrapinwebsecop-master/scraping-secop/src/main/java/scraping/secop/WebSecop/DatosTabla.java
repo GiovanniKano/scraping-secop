@@ -65,7 +65,9 @@ public class DatosTabla {
                 List<WebElement> filas = tabla.findElements(By.xpath("//table[@id='gridListMultipleNodeRegion_0_tbl']/tbody/tr[@class='gridLineLight' or @class='gridLineDark']"));
                 LOG.info("Filas traidas." + filas.size());
                 for(int i = 0; i < filas.size(); i++){
-                    codigos.add(filas.get(i).findElement(By.className("VortalTagSpan")).getText());
+                    String codigo = driver.findElement(By.id("trRowCategorization_tdCell1_incDossierCategorizationgridListMultipleNodeRegion_0_tr"+i)).getText();
+                    LOG.info(codigo);
+                    codigos.add(codigo);
                 }
                 datos.setListaCodigosUBSPC(codigos);
             }else{

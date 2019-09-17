@@ -1,7 +1,7 @@
 package scraping.secop.Util;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,6 +74,12 @@ public class FilesUtils {
             LOG.error("Ocurrio un error abriendo carpeta" + ex.getMessage());
             return null;
         }
+    }
+
+    public long getSizeOfDirectory(String path){
+        long size = FileUtils.sizeOfDirectory(new File(path));
+        LOG.info("Tamaño de directorio = " + size);
+        return size;
     }
 
 }

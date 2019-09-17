@@ -1,5 +1,6 @@
 package scraping.secop.SecopVO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatosTablaVO {
@@ -7,7 +8,7 @@ public class DatosTablaVO {
     private String enlace;
     private String descripcion;
     private String valorEstimado;
-    private List<String> listaCodigosUBSPC;
+    private List<String> listaCodigosUBSPC = new ArrayList<>();
     private String fechaPresentacion;
     private String nombreEntidad;
 

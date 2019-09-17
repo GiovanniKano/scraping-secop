@@ -15,7 +15,7 @@ public class StartScraping {
         try{
             LOG.info("Iniciando scraping:" + new Date());
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-            service.scheduleAtFixedRate(new Task(), 0, 30, TimeUnit.MINUTES);
+            service.scheduleAtFixedRate(new Task(), 0, 24, TimeUnit.HOURS);
         }
         catch (Exception ex){
             LOG.error("Ha ocurrido un error iniciando scraping" + ex.getMessage());
