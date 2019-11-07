@@ -2,6 +2,8 @@ package scraping.secop.Util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import scraping.secop.SecopVO.ConfigPropertiesVO;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,10 +17,10 @@ public class FilesUtils {
 
     private static final Logger LOG =  Logger.getLogger(FilesUtils.class);
 
-    public List<String> leerArchivo(){
+    public List<String> leerArchivo(ConfigPropertiesVO config){
         List<String> codigos = new ArrayList<>();
         try {
-            File archivoRelacion = new File("C:\\Users\\Ingenian Sotware\\Documents\\Codigos\\codigos.txt");
+            File archivoRelacion = new File(config.getCodePath());
             BufferedReader lectura = new BufferedReader(new FileReader(archivoRelacion));
             String linea;
             while((linea = lectura.readLine()) != null) {

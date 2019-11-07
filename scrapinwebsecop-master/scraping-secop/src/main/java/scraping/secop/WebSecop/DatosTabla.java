@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import scraping.secop.SecopVO.ConfigPropertiesVO;
 import scraping.secop.SecopVO.Constantes;
 import scraping.secop.SecopVO.DatosTablaVO;
 import scraping.secop.Util.ElementExist;
@@ -19,7 +20,7 @@ public class DatosTabla {
     private List<DatosTablaVO> listDatos = new ArrayList<>();
     private ElementExist exist = new ElementExist();
 
-    public void goToLink(WebDriver driver, List<String> links, List<String> nombreEntidad, String path){
+    public void goToLink(WebDriver driver, List<String> links, List<String> nombreEntidad, String path, ConfigPropertiesVO config){
         try {
             int contador = 0;
             for (String x: links) {
@@ -32,7 +33,7 @@ public class DatosTabla {
                 descargarDocumentos(driver);
                 File ruta = new FilesUtils().moveDocuments(path);
                 fillData(driver, nombreEntidad, contador);
-                new SendEmail().email(listDatos.get(contador), ruta.getAbsolutePath());
+                new SendEmail().email(listDatos.get(contador), ruta.getAbsolutePath(), config);
                 ruta.delete();
                 contador++;
                 driver.close();

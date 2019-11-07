@@ -1,6 +1,7 @@
 package scraping.secop.WebSecop;
 
 import org.apache.log4j.Logger;
+import scraping.secop.SecopVO.ConfigPropertiesVO;
 import scraping.secop.SecopVO.Constantes;
 import scraping.secop.SecopVO.DatosTablaVO;
 import scraping.secop.Util.FilesUtils;
@@ -21,7 +22,7 @@ public class SendEmail {
 
     private static final Logger LOG = Logger.getLogger(SendEmail.class);
 
-    public void email(DatosTablaVO datos, String path){
+    public void email(DatosTablaVO datos, String path, ConfigPropertiesVO config){
         String host="smtp.gmail.com";
         Properties props = new Properties();
         props.setProperty("mail.transport.protocol", "smtp");
@@ -36,14 +37,14 @@ public class SendEmail {
         Session session = Session.getDefaultInstance(props,
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(Constantes.USEREMAIL, Constantes.PASSWORDMAIL);
+                        return new PasswordAuthentication(config.getUserMail(), config.getPasswordMail());
                     }
                 });
         try {
             StringBuilder mensaje = new StringBuilder();
             MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(Constantes.USEREMAIL));
-            message.addRecipient(Message.RecipientType.TO,new InternetAddress(Constantes.TOUSERMAIL));
+            message.setFrom(new InternetAddress(config.getUserMail()));
+            message.addRecipient(Message.RecipientType.TO,new InternetAddress(config.getUserMailTo()));
             long size = new FilesUtils().getSizeOfDirectory(path);
             size = size / (1024*1024);
             LOG.info(size + "mb");

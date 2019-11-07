@@ -8,6 +8,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import scraping.secop.SecopVO.ConfigPropertiesVO;
 import scraping.secop.SecopVO.Constantes;
 import scraping.secop.Util.ElementExist;
 import java.io.File;
@@ -21,7 +22,7 @@ public class ScrapingWebSecop {
     private File folder;
     private ElementExist exist;
 
-    public void startScrapinWeb(String codigo){
+    public void startScrapinWeb(String codigo, ConfigPropertiesVO config){
         try{
             LOG.info("Iniciando driver de chrome");
             folder = new File(UUID.randomUUID().toString());
@@ -36,33 +37,33 @@ public class ScrapingWebSecop {
             DesiredCapabilities cap = DesiredCapabilities.chrome();
             cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
             cap.setCapability(ChromeOptions.CAPABILITY, options);
-            System.setProperty("webdriver.chrome.driver", "D:\\SeleniumDrive\\chromedriver.exe");
+            System.setProperty("webdriver.chrome.driver", config.getDriverPath());
             WebDriver driver = new ChromeDriver(options);
             driver.manage().window().maximize();
             driver.get(Constantes.URL);
-            this.loginSecop(driver);
+            this.loginSecop(driver, config);
             LOG.info("Navengando por la página principal.");
             this.goTo(driver);
             LOG.info("Navengando por busqueda de procesos.");
-            this.busquedaAvanzada(driver, codigo);
+            this.busquedaAvanzada(driver, codigo, config);
         }
         catch (WebDriverException ex){
             LOG.error("Ocurrio un error inicializando el scraping" + ex.getMessage());
         }
     }
 
-    private void loginSecop(WebDriver driver){
+    private void loginSecop(WebDriver driver, ConfigPropertiesVO config){
         try{
             LOG.info("Iniciando sesión...");
-            driver.findElement(By.id("txtUserName")).sendKeys(Constantes.usuario);
-            driver.findElement(By.id("txtPassword")).sendKeys(Constantes.cotrasena);
-            driver.findElement(By.id("btnLoginButton")).click();
+            driver.findElement(By.id("txtUserName")).sendKeys(config.getUserSecop());
+            driver.findElement(By.id("txtPassword")).sendKeys(config.getPasswordSecop());
+            JavascriptExecutor jse1 = (JavascriptExecutor)driver;
+            jse1.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, driver.findElement(By.id("btnLoginButton")));
             LOG.info("Inicio de sesión exitoso.");
-            /*wait = new WebDriverWait(driver, Constantes.Timeout);
+            wait = new WebDriverWait(driver, Constantes.Timeout);
             WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("btnAcknowledgeGen")));
-            LOG.info(element);
             JavascriptExecutor jse2 = (JavascriptExecutor)driver;
-            jse2.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);*/
+            jse2.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element);
         }
         catch (WebDriverException ex){
             LOG.error("Ocurrio un error iniciado sesión en la página" + ex.getMessage());
@@ -87,7 +88,7 @@ public class ScrapingWebSecop {
         }
     }
 
-    public void busquedaAvanzada(WebDriver driver, String codigo){
+    public void busquedaAvanzada(WebDriver driver, String codigo, ConfigPropertiesVO config){
         try {
             wait = new WebDriverWait(driver, Constantes.Timeout);
             WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("lnkAdvancedSearch")));
@@ -99,12 +100,14 @@ public class ScrapingWebSecop {
             WebElement element1 = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(), '"+codigo+"')]")));
             JavascriptExecutor java = (JavascriptExecutor)driver;
             java.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, element1);
-            driver.findElement(By.id("btnSearchButton")).click();
+            WebElement search = driver.findElement(By.id("btnSearchButton"));
+            JavascriptExecutor java2 = (JavascriptExecutor)driver;
+            java2.executeScript(Constantes.SUPERPOSICION_NO_PERMANENTE, search);
             LOG.info("Esperando respuesta");
             wait = new WebDriverWait(driver, Constantes.Timeout);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("loadingCursor")));
             if(wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("loadingCursor")))) {
-                getTable(driver);
+                getTable(driver, config);
             }
         }
         catch (WebDriverException ex){
@@ -113,7 +116,7 @@ public class ScrapingWebSecop {
         }
     }
 
-    private void getTable(WebDriver driver){
+    private void getTable(WebDriver driver, ConfigPropertiesVO config){
         try{
             wait = new WebDriverWait(driver, Constantes.Timeout);
             WebElement espera = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("tblMainTable_trRowMiddle_tdCell1_tblForm_trTitleRow_tdCell1_spnFilteringOver")));
@@ -124,7 +127,7 @@ public class ScrapingWebSecop {
                 JavascriptExecutor execute = (JavascriptExecutor)driver;
                 execute.executeScript("arguments[0].scrollIntoView();", table);
                 filas = table.findElements(By.xpath("//tr[@class='gridLineLight' or @class='gridLineDark']"));
-                getFecha(filas, driver);
+                getFecha(filas, driver, config);
             }
         }
         catch (WebDriverException ex){
@@ -133,7 +136,7 @@ public class ScrapingWebSecop {
         }
     }
 
-    private void getFecha(List<WebElement> tabla, WebDriver driver){
+    private void getFecha(List<WebElement> tabla, WebDriver driver, ConfigPropertiesVO config){
         try{
             String[] campos;
             boolean filaCompleta = true;
@@ -156,13 +159,13 @@ public class ScrapingWebSecop {
                 clickMoreTable(driver);
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("loadingCursor")));
                 if(wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("loadingCursor")))){
-                    this.getTable(driver);
+                    this.getTable(driver, config);
                 }
                 if(!exist.elementeExist("esperaProvocada", driver)){
-                    this.getTable(driver);
+                    this.getTable(driver, config);
                 }
             }
-            getDatos(filas, driver);
+            getDatos(filas, driver, config);
         }
         catch (WebDriverException ex){
             LOG.error("Ocurrio un error obteniendo fechas: " + ex.getMessage());
@@ -170,7 +173,7 @@ public class ScrapingWebSecop {
         }
     }
 
-    private void getDatos(List<WebElement> tabla, WebDriver driver){
+    private void getDatos(List<WebElement> tabla, WebDriver driver, ConfigPropertiesVO config){
         try{
             LOG.info("Filas a consultar: " + tabla.size());
             if(tabla.size() == 0){
@@ -191,7 +194,7 @@ public class ScrapingWebSecop {
                 links.add(text);
                 LOG.info(links.get(x));
             }
-            new DatosTabla().goToLink(driver, links, entidad, folder.getAbsolutePath());
+            new DatosTabla().goToLink(driver, links, entidad, folder.getAbsolutePath(), config);
         }
         catch (WebDriverException ex){
             LOG.error("Ocurrio un error obteniendo detalle de la tabla: " + ex.getMessage());
@@ -201,9 +204,9 @@ public class ScrapingWebSecop {
 
     private boolean diasTranscurridos(String fecha){
         try{
-            String hoy = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a").format(new Date());
-            Date fechafin = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a").parse(hoy);
-            SimpleDateFormat formatoinicio = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a");
+            String hoy = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a", Locale.US).format(new Date());
+            Date fechafin = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a", Locale.US).parse(hoy);
+            SimpleDateFormat formatoinicio = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss a", Locale.US);
             Date fechainicio = formatoinicio.parse(fecha);
             int diferencia = (int)(fechafin.getTime() - fechainicio.getTime());
             int horas = diferencia/(1000*60*60);
